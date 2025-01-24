@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Dr(a). {{ current_user.medico.nome }}</h5>
+                    <p class="text-muted">{{ current_user.medico.especialidade }}</p>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <a href="#consultas-hoje" class="btn btn-outline-primary">Consultas de Hoje</a>
+                        <a href="#proximas-consultas" class="btn btn-outline-primary">Próximas Consultas</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Conteúdo Principal -->
+        <div class="col-md-9">
+            <!-- Consultas de Hoje -->
+            <div class="card mb-4" id="consultas-hoje">
+                <div class="card-body">
+                    <h4 class="card-title">Consultas de Hoje</h4>
+                    {% if consultas_hoje %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Horário</th>
+                                        <th>Paciente</th>
+                                        <th>Telefone</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for consulta in consultas_hoje %}
+                                    <tr>
+                                        <td>{{ consulta.data_hora.strftime('%H:%M') }}</td>
+                                        <td>{{ consulta.paciente.nome }}</td>
+                                        <td>{{ consulta.paciente.telefone }}</td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ consulta.status }}</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Nenhuma consulta agendada para hoje.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Próximas Consultas -->
+            <div class="card" id="proximas-consultas">
+                <div class="card-body">
+                    <h4 class="card-title">Próximas Consultas</h4>
+                    {% if proximas_consultas %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Horário</th>
+                                        <th>Paciente</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for consulta in proximas_consultas %}
+                                    <tr>
+                                        <td>{{ consulta.data_hora.strftime('%d/%m/%Y') }}</td>
+                                        <td>{{ consulta.data_hora.strftime('%H:%M') }}</td>
+                                        <td>{{ consulta.paciente.nome }}</td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ consulta.status }}</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Nenhuma consulta futura agendada.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

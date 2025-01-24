@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <div class="container">
+        <div class="auth-card card">
+            <div class="card-body">
+                <h2 class="card-title text-center">Agende sua Consulta</h2>
+                <form method="POST" action="{{ url_for('agendar') }}" id="formAgendamento">
+                    <div class="mb-4">
+                        <label class="form-label">Especialidade</label>
+                        <select class="form-select" name="especialidade" id="especialidade" required>
+                            <option value="">Selecione uma especialidade</option>
+                            {% for especialidade in especialidades %}
+                            <option value="{{ especialidade }}" {% if especialidade == especialidade_selecionada %}selected{% endif %}>
+                                {{ especialidade }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Médico</label>
+                        <select class="form-select" name="medico_id" id="medico" required disabled>
+                            <option value="">Primeiro selecione uma especialidade</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Data da Consulta</label>
+                        <input type="date" class="form-control" name="data" id="data" 
+                               required min="{{ hoje }}" max="{{ max_data }}">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Horário</label>
+                        <select class="form-select" name="horario" id="horario" required disabled>
+                            <option value="">Selecione uma data primeiro</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn-agendar">
+                            <span class="text">Confirmar Agendamento</span>
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4.66669 11.3334L11.3334 4.66669" stroke="white" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M4.66669 4.66669H11.3334V11.3334" stroke="white" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const medicosPorEspecialidade = {{ medicos_por_especialidade | tojson | safe }};
+    const especialidadeSelect = document.getElementById('especialidade');
+    const medicoSelect = document.getElementById('medico');
+    
+    especialidadeSelect.addEventListener('change', function() {
+        const especialidade = this.value;
+        medicoSelect.innerHTML = '<option value="">Selecione um médico</option>';
+        
+        if (especialidade) {
+            const medicos = medicosPorEspecialidade[especialidade] || [];
+            medicos.forEach(medico => {
+                const option = document.createElement('option');
+                option.value = medico.id;
+                option.textContent = `Dr(a). ${medico.nome} - CRM: ${medico.crm}`;
+                medicoSelect.appendChild(option);
+            });
+            medicoSelect.disabled = false;
+        } else {
+            medicoSelect.disabled = true;
+        }
+    });
+    
+    // Dispara o evento change se já houver uma especialidade selecionada
+    if (especialidadeSelect.value) {
+        especialidadeSelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
+{% endblock %} 

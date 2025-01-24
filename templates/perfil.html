@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <div class="row">
+        <!-- Sidebar com informações do usuário -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    {% if current_user.tipo == 'paciente' %}
+                        <h3>{{ current_user.paciente.nome }}</h3>
+                        <p class="text-muted">Paciente</p>
+                        <hr>
+                        <p><i class="fas fa-envelope me-2"></i>{{ current_user.email }}</p>
+                        <p><i class="fas fa-phone me-2"></i>{{ current_user.paciente.telefone }}</p>
+                    {% else %}
+                        <h3>Dr(a). {{ current_user.medico.nome }}</h3>
+                        <p class="text-muted">{{ current_user.medico.especialidade }}</p>
+                        <hr>
+                        <p><i class="fas fa-id-card me-2"></i>CRM: {{ current_user.medico.crm }}</p>
+                        <p><i class="fas fa-envelope me-2"></i>{{ current_user.email }}</p>
+                    {% endif %}
+                    
+                    <a href="#" class="btn btn-outline-primary btn-sm mt-3">
+                        <i class="fas fa-edit me-2"></i>Editar Perfil
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Lista de consultas -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Minhas Consultas</h4>
+                    
+                    <ul class="nav nav-tabs mb-3">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#proximas" data-bs-toggle="tab">Próximas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#historico" data-bs-toggle="tab">Histórico</a>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="proximas">
+                            {% for consulta in consultas if consulta.data_hora > now %}
+                            <div class="consulta-card mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                {% if current_user.tipo == 'paciente' %}
+                                                    <h5>Dr(a). {{ consulta.medico.nome }}</h5>
+                                                    <p class="text-muted">{{ consulta.medico.especialidade }}</p>
+                                                {% else %}
+                                                    <h5>{{ consulta.paciente.nome }}</h5>
+                                                {% endif %}
+                                                <p><i class="far fa-calendar me-2"></i>{{ consulta.data_hora.strftime('%d/%m/%Y %H:%M') }}</p>
+                                            </div>
+                                            <div>
+                                                <button class="btn btn-outline-danger btn-sm" 
+                                                        onclick="cancelarConsulta({{ consulta.id }})">
+                                                    Cancelar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center">Nenhuma consulta agendada</p>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="tab-pane fade" id="historico">
+                            {% for consulta in consultas if consulta.data_hora <= now %}
+                            <div class="consulta-card mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                {% if current_user.tipo == 'paciente' %}
+                                                    <h5>Dr(a). {{ consulta.medico.nome }}</h5>
+                                                    <p class="text-muted">{{ consulta.medico.especialidade }}</p>
+                                                {% else %}
+                                                    <h5>{{ consulta.paciente.nome }}</h5>
+                                                {% endif %}
+                                                <p><i class="far fa-calendar me-2"></i>{{ consulta.data_hora.strftime('%d/%m/%Y %H:%M') }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center">Nenhuma consulta no histórico</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function cancelarConsulta(consultaId) {
+    if (confirm('Tem certeza que deseja cancelar esta consulta?')) {
+        try {
+            const response = await fetch(`/cancelar-consulta/${consultaId}`, {
+                method: 'POST'
+            });
+            
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Erro ao cancelar consulta');
+            }
+        } catch (error) {
+            alert('Erro ao cancelar consulta');
+        }
+    }
+}
+</script>
+{% endblock %} 
