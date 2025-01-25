@@ -15,7 +15,6 @@ Principais funcionalidades:
 
 - **Agendamento Online**: Marque, cancele ou remarque consultas.
 - **Gerenciamento de Usuários**: Cadastro de pacientes e profissionais.
-- **Lembretes Automáticos**: Envio de notificações para evitar faltas.
 
 ---
 
