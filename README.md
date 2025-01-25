@@ -33,7 +33,7 @@ Principais funcionalidades:
 
 ```bash
 git clone https://github.com/joaoportolan93/medical-scheduler.git
-cd medical-scheduler
+cd MedSync
 ```
 
 ### 2. Configurar o Ambiente
