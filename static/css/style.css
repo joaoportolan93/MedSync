@@ -28,16 +28,37 @@ body {
     gap: 12px;
 }
 
-.navbar-brand img {
-    height: 50px;
-    width: auto;
-    transition: transform 0.3s ease;
+.logo-container {
+    display: flex;
+    align-items: center;
 }
 
-.navbar-brand span {
+.logo-text {
+    font-size: 1.8rem;
     font-weight: 700;
-    font-size: 1.4rem;
     color: var(--primary-color);
+    letter-spacing: -0.5px;
+}
+
+.logo-text span {
+    color: #2c3e50;
+}
+
+.logo-icon {
+    width: 35px;
+    height: 35px;
+    background: var(--primary-color);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+}
+
+.logo-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
 }
 
 /* Para versão mobile */
