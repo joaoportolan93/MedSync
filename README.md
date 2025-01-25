@@ -1,7 +1,7 @@
 
-# Medical Scheduler
+# MedSync
 
-Bem-vindo ao repositório do **Medical Scheduler**, um sistema projetado para simplificar e modernizar o agendamento de consultas médicas.
+Bem-vindo ao repositório do **MedSync**, um sistema projetado para simplificar e modernizar o agendamento de consultas médicas.
 
 Este README fornece uma breve visão geral do projeto e instruções básicas para começar a utilizá-lo. Para informações mais detalhadas, consulte a [Documentação Completa](DOCUMENTATION.md) ou o [Manual de Uso](USER_GUIDE.md).
 
@@ -9,7 +9,7 @@ Este README fornece uma breve visão geral do projeto e instruções básicas pa
 
 ## Apresentação
 
-O **Medical Scheduler** é uma aplicação web responsiva, intuitiva e funcional, desenvolvida para otimizar o fluxo de trabalho de clínicas e consultórios médicos. Ele permite que pacientes agendem consultas rapidamente e que profissionais de saúde gerenciem suas agendas de forma eficiente.
+O **MedSync** é uma aplicação web responsiva, intuitiva e funcional, desenvolvida para otimizar o fluxo de trabalho de clínicas e consultórios médicos. Ele permite que pacientes agendem consultas rapidamente e que profissionais de saúde gerenciem suas agendas de forma eficiente.
 
 Principais funcionalidades:
 
