@@ -49,7 +49,7 @@ O **MedSync** é uma plataforma web desenvolvida para otimizar o agendamento de 
 1. Clone o repositório:
    ```bash
    git clone https://github.com/joaoportolan93/medical-scheduler.git
-   cd medical-scheduler
+   cd MedSync
    ```
 
 2. Crie um ambiente virtual:
