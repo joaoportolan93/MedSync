@@ -2,7 +2,7 @@
 
 ## Introdução
 
-O **Medical Scheduler** é uma plataforma web desenvolvida para otimizar o agendamento de consultas médicas. Este sistema oferece funcionalidades completas para pacientes, médicos e administradores de clínicas.
+O **MedSync** é uma plataforma web desenvolvida para otimizar o agendamento de consultas médicas. Este sistema oferece funcionalidades completas para pacientes, médicos e administradores de clínicas.
 
 ---
 
