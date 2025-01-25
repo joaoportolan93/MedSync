@@ -1,5 +1,3 @@
-## Documentação Completa (EN)
-
 ### Introduction
 
 The **Medical Scheduler** is a web platform designed to optimize medical appointment scheduling. This system provides comprehensive features for patients, doctors, and clinic administrators.
