@@ -82,6 +82,46 @@ document.addEventListener('DOMContentLoaded', function() {
     if (especialidadeSelect.value) {
         especialidadeSelect.dispatchEvent(new Event('change'));
     }
+
+    const dataInput = document.getElementById('data');
+    const horarioSelect = document.getElementById('horario');
+    
+    async function atualizarHorarios() {
+        const data = dataInput.value;
+        
+        if (data) {
+            try {
+                const response = await fetch(`/api/horarios-disponiveis?data=${data}`);
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar horários');
+                }
+                
+                const horarios = await response.json();
+                
+                // Limpar e preencher o select de horários
+                horarioSelect.innerHTML = '<option value="">Selecione um horário</option>';
+                horarios.forEach(horario => {
+                    const option = document.createElement('option');
+                    option.value = horario;
+                    option.textContent = horario;
+                    horarioSelect.appendChild(option);
+                });
+                
+                // Habilitar o select de horários
+                horarioSelect.disabled = false;
+            } catch (error) {
+                console.error('Erro:', error);
+                horarioSelect.innerHTML = '<option value="">Erro ao carregar horários</option>';
+                horarioSelect.disabled = true;
+            }
+        } else {
+            horarioSelect.innerHTML = '<option value="">Selecione uma data primeiro</option>';
+            horarioSelect.disabled = true;
+        }
+    }
+    
+    // Adicionar listener para mudança de data
+    dataInput.addEventListener('change', atualizarHorarios);
 });
 </script>
 {% endblock %} 

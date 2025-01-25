@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash, abort
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from sqlalchemy import and_, func
 import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///clinica.db'  # Para SQLite
@@ -14,9 +15,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///clinica.db'  # Para SQLite
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'sua_chave_secreta_aqui'  # Mude para uma chave segura em produção
 
-UPLOAD_FOLDER = os.path.join('static', 'img')
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 db = SQLAlchemy(app)
 
@@ -57,6 +63,12 @@ class Paciente(db.Model):
     email = db.Column(db.String(100), nullable=False)
     telefone = db.Column(db.String(20))
     data_nascimento = db.Column(db.Date)
+    cpf = db.Column(db.String(14))
+    genero = db.Column(db.String(20))
+    endereco = db.Column(db.String(200))
+    cidade = db.Column(db.String(100))
+    estado = db.Column(db.String(2))
+    foto_perfil = db.Column(db.String(200))  # Caminho para a foto
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
     
     consultas = db.relationship('Consulta', backref='paciente', lazy=True)
@@ -75,7 +87,9 @@ class Consulta(db.Model):
     paciente_id = db.Column(db.Integer, db.ForeignKey('paciente.id'), nullable=False)
     medico_id = db.Column(db.Integer, db.ForeignKey('medico.id'), nullable=False)
     data_hora = db.Column(db.DateTime, nullable=False)
-    status = db.Column(db.String(20), default='agendada')
+    status = db.Column(db.String(20), default='agendada')  # agendada, realizada, cancelada
+    data_cancelamento = db.Column(db.DateTime)
+    motivo_cancelamento = db.Column(db.String(200))
     
     @staticmethod
     def verificar_disponibilidade(medico_id, data_hora):
@@ -149,147 +163,146 @@ def logout():
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
     if request.method == 'POST':
-        nome = request.form.get('nome')
-        email = request.form.get('email')
-        senha = request.form.get('senha')
-        confirmar_senha = request.form.get('confirmar_senha')
-        telefone = request.form.get('telefone')
-        data_nascimento = request.form.get('data_nascimento')
-        
-        # Validações básicas
-        if not all([nome, email, senha, confirmar_senha]):
-            flash('Por favor, preencha todos os campos obrigatórios.')
-            return redirect(url_for('cadastro'))
-        
-        if senha != confirmar_senha:
-            flash('As senhas não coincidem.')
-            return redirect(url_for('cadastro'))
-        
-        # Verificar se o email já está cadastrado
-        if Usuario.query.filter_by(email=email).first():
-            flash('Este email já está cadastrado.')
-            return redirect(url_for('cadastro'))
-        
         try:
-            # Criar novo usuário
+            # Obter dados do formulário
+            nome = request.form.get('nome')
+            email = request.form.get('email')
+            senha = request.form.get('senha')
+            telefone = request.form.get('telefone')
+            data_nascimento = request.form.get('data_nascimento')
+
+            # Validações básicas
+            if not nome or not email or not senha:
+                flash('Por favor, preencha todos os campos obrigatórios.')
+                return redirect(url_for('cadastro'))
+
+            # Verificar se o email já existe
+            if Usuario.query.filter_by(email=email).first():
+                flash('Email já cadastrado.')
+                return redirect(url_for('cadastro'))
+
+            # Criar usuário
             novo_usuario = Usuario(
                 email=email,
                 senha=generate_password_hash(senha),
                 tipo='paciente'
             )
-            db.session.add(novo_usuario)
-            db.session.flush()  # Gera o ID do usuário
             
-            # Criar novo paciente
-            data_nasc = datetime.strptime(data_nascimento, '%Y-%m-%d').date() if data_nascimento else None
+            # Adicionar usuário ao banco
+            db.session.add(novo_usuario)
+            db.session.flush()
+
+            # Criar paciente
             novo_paciente = Paciente(
                 nome=nome,
                 email=email,
                 telefone=telefone,
-                data_nascimento=data_nasc,
                 usuario_id=novo_usuario.id
             )
+
+            # Tratar data de nascimento se fornecida
+            if data_nascimento:
+                try:
+                    data_nasc = datetime.strptime(data_nascimento, '%Y-%m-%d').date()
+                    novo_paciente.data_nascimento = data_nasc
+                except ValueError:
+                    pass  # Se a data for inválida, ignora
+
+            # Adicionar paciente ao banco
             db.session.add(novo_paciente)
             db.session.commit()
-            
-            # Fazer login automático após o cadastro
+
+            # Login automático
             login_user(novo_usuario)
             flash('Cadastro realizado com sucesso!')
-            return redirect(url_for('index'))
-            
+            return redirect(url_for('perfil'))
+
         except Exception as e:
             db.session.rollback()
+            print(f"Erro no cadastro: {str(e)}")  # Log do erro
             flash('Erro ao realizar cadastro. Por favor, tente novamente.')
-            print(f"Erro no cadastro: {str(e)}")  # Para debug
             return redirect(url_for('cadastro'))
-    
+
     return render_template('cadastro.html')
 
 @app.route('/agendar', methods=['GET', 'POST'])
 @login_required
 def agendar():
-    if not current_user.is_authenticated:
-        flash('Por favor, faça login para agendar uma consulta.')
-        return redirect(url_for('login'))
-    
     if request.method == 'POST':
-        medico_id = request.form.get('medico_id')
-        data = request.form.get('data')
-        horario = request.form.get('horario')
-        
-        # Criar data_hora
         try:
+            # Pegar dados do formulário
+            medico_id = request.form.get('medico_id')
+            data = request.form.get('data')
+            horario = request.form.get('horario')
+            
+            # Converter data e horário para datetime
             data_hora = datetime.strptime(f"{data} {horario}", "%Y-%m-%d %H:%M")
-        except ValueError:
-            flash('Data ou horário inválido')
-            return redirect(url_for('agendar'))
-        
-        # Verificar disponibilidade
-        disponivel, mensagem = Consulta.verificar_disponibilidade(medico_id, data_hora)
-        if not disponivel:
-            flash(mensagem)
-            return redirect(url_for('agendar'))
-        
-        # Criar nova consulta
-        nova_consulta = Consulta(
-            paciente_id=current_user.paciente.id,
-            medico_id=medico_id,
-            data_hora=data_hora
-        )
-        
-        try:
+            
+            # Criar nova consulta
+            nova_consulta = Consulta(
+                paciente_id=current_user.paciente.id,
+                medico_id=medico_id,
+                data_hora=data_hora,
+                status='agendada'
+            )
+            
             db.session.add(nova_consulta)
             db.session.commit()
-            flash('Consulta agendada com sucesso!')
+            
+            flash('Consulta agendada com sucesso!', 'success')
             return redirect(url_for('perfil'))
-        except:
+            
+        except Exception as e:
             db.session.rollback()
-            flash('Erro ao agendar consulta')
+            flash('Erro ao agendar consulta. Por favor, tente novamente.', 'error')
+            print(f"Erro no agendamento: {str(e)}")  # Para debug
     
+    # Código GET existente
     especialidade_selecionada = request.args.get('especialidade', '')
+    especialidades = ['Cardiologia', 'Dermatologia', 'Ortopedia', 'Pediatria', 'Ginecologia', 'Oftalmologia']
+    hoje = date.today().strftime('%Y-%m-%d')
+    max_data = (date.today() + timedelta(days=30)).strftime('%Y-%m-%d')
     
-    # Buscar médicos agrupados por especialidade
     medicos_por_especialidade = {}
-    for especialidade in ESPECIALIDADES:
-        medicos = Medico.query.filter_by(especialidade=especialidade).all()
-        if medicos:
-            # Converter médicos para dicionário para ser serializável
-            medicos_lista = [{'id': m.id, 'nome': m.nome, 'crm': m.crm} for m in medicos]
-            medicos_por_especialidade[especialidade] = medicos_lista
+    for esp in especialidades:
+        medicos = Medico.query.filter_by(especialidade=esp).all()
+        medicos_por_especialidade[esp] = [{'id': m.id, 'nome': m.nome, 'crm': m.crm} for m in medicos]
     
     return render_template('agendar.html',
-                         especialidades=ESPECIALIDADES,
-                         medicos=Medico.query.all(),
-                         medicos_por_especialidade=medicos_por_especialidade,
+                         especialidades=especialidades,
                          especialidade_selecionada=especialidade_selecionada,
-                         hoje=datetime.now().strftime('%Y-%m-%d'),
-                         max_data=(datetime.now() + timedelta(days=90)).strftime('%Y-%m-%d'))
+                         medicos_por_especialidade=medicos_por_especialidade,
+                         hoje=hoje,
+                         max_data=max_data)
 
 @app.route('/api/horarios-disponiveis', methods=['GET'])
 def horarios_disponiveis():
-    medico_id = request.args.get('medico_id')
     data = request.args.get('data')
     
-    if not medico_id or not data:
+    if not data:
         return jsonify([])
     
     # Horários possíveis de consulta
     horarios_possiveis = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00']
     
-    # Converter a data para datetime
-    data_consulta = datetime.strptime(data, '%Y-%m-%d').date()
-    
-    # Buscar consultas existentes do médico na data
-    consultas = Consulta.query.filter(
-        Consulta.medico_id == medico_id,
-        db.func.date(Consulta.data_hora) == data_consulta
-    ).all()
-    
-    # Remover horários já agendados
-    horarios_ocupados = [c.data_hora.strftime('%H:%M') for c in consultas]
-    horarios_disponiveis = [h for h in horarios_possiveis if h not in horarios_ocupados]
-    
-    return jsonify(horarios_disponiveis)
+    try:
+        # Converter a data para datetime
+        data_consulta = datetime.strptime(data, '%Y-%m-%d').date()
+        
+        # Buscar consultas existentes na data
+        consultas = Consulta.query.filter(
+            db.func.date(Consulta.data_hora) == data_consulta
+        ).all()
+        
+        # Remover horários já agendados
+        horarios_ocupados = [c.data_hora.strftime('%H:%M') for c in consultas]
+        horarios_disponiveis = [h for h in horarios_possiveis if h not in horarios_ocupados]
+        
+        return jsonify(horarios_disponiveis)
+        
+    except Exception as e:
+        print(f"Erro ao buscar horários: {str(e)}")
+        return jsonify([]), 500
 
 @app.route('/painel-medico')
 @login_required
@@ -317,11 +330,19 @@ def painel_medico():
 @login_required
 def perfil():
     # Buscar consultas do usuário
-    consultas = Consulta.query.filter_by(
-        paciente_id=current_user.paciente.id
-    ).order_by(Consulta.data_hora.desc()).all()
+    if current_user.tipo == 'paciente':
+        consultas = Consulta.query.filter_by(
+            paciente_id=current_user.paciente.id
+        ).order_by(Consulta.data_hora.desc()).all()
+    else:
+        consultas = Consulta.query.filter_by(
+            medico_id=current_user.medico.id
+        ).order_by(Consulta.data_hora.desc()).all()
     
-    return render_template('perfil.html', consultas=consultas)
+    # Adicionar datetime.now() ao contexto
+    return render_template('perfil.html', 
+                         consultas=consultas,
+                         now=datetime.now())
 
 @app.route('/cancelar-consulta/<int:consulta_id>', methods=['POST'])
 @login_required
@@ -329,17 +350,73 @@ def cancelar_consulta(consulta_id):
     consulta = Consulta.query.get_or_404(consulta_id)
     
     # Verificar se o usuário tem permissão para cancelar
-    if current_user.tipo == 'paciente' and consulta.paciente_id != current_user.paciente.id:
-        abort(403)
+    if current_user.paciente.id != consulta.paciente_id:
+        flash('Você não tem permissão para cancelar esta consulta.', 'error')
+        return redirect(url_for('perfil'))
     
-    # Não permitir cancelamento de consultas passadas
+    # Verificar se a consulta já passou
     if consulta.data_hora < datetime.now():
-        return jsonify({'error': 'Não é possível cancelar consultas passadas'}), 400
+        flash('Não é possível cancelar consultas passadas.', 'error')
+        return redirect(url_for('perfil'))
     
+    # Verificar se a consulta já foi cancelada
+    if consulta.status == 'cancelada':
+        flash('Esta consulta já foi cancelada.', 'error')
+        return redirect(url_for('perfil'))
+    
+    motivo = request.form.get('motivo', '')
     consulta.status = 'cancelada'
-    db.session.commit()
+    consulta.data_cancelamento = datetime.now()
+    consulta.motivo_cancelamento = motivo
     
-    return jsonify({'message': 'Consulta cancelada com sucesso'})
+    try:
+        db.session.commit()
+        flash('Consulta cancelada com sucesso.', 'success')
+    except:
+        db.session.rollback()
+        flash('Erro ao cancelar consulta.', 'error')
+    
+    return redirect(url_for('perfil'))
+
+@app.route('/editar-perfil', methods=['GET', 'POST'])
+@login_required
+def editar_perfil():
+    if request.method == 'POST':
+        paciente = current_user.paciente
+        
+        # Atualizar informações básicas
+        paciente.nome = request.form.get('nome')
+        paciente.telefone = request.form.get('telefone')
+        paciente.cpf = request.form.get('cpf')
+        paciente.genero = request.form.get('genero')
+        paciente.endereco = request.form.get('endereco')
+        paciente.cidade = request.form.get('cidade')
+        paciente.estado = request.form.get('estado')
+        
+        # Processar data de nascimento
+        data_nasc = request.form.get('data_nascimento')
+        if data_nasc:
+            paciente.data_nascimento = datetime.strptime(data_nasc, '%Y-%m-%d').date()
+        
+        # Processar foto de perfil
+        if 'foto' in request.files:
+            foto = request.files['foto']
+            if foto and allowed_file(foto.filename):
+                filename = secure_filename(foto.filename)
+                filepath = os.path.join(UPLOAD_FOLDER, filename)
+                foto.save(filepath)
+                paciente.foto_perfil = os.path.join('uploads', filename)
+        
+        try:
+            db.session.commit()
+            flash('Perfil atualizado com sucesso!', 'success')
+        except:
+            db.session.rollback()
+            flash('Erro ao atualizar perfil.', 'error')
+        
+        return redirect(url_for('perfil'))
+    
+    return render_template('editar_perfil.html')
 
 # Recrie o banco de dados
 def init_db():

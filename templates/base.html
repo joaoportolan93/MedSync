@@ -30,13 +30,13 @@
     <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
             <a class="navbar-brand" href="/">
-                <div class="logo-container">
-                    <div class="logo-icon">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 2L4 6v12l8 4 8-4V6l-8-4zM12 4.618L17.236 7 12 9.382 6.764 7 12 4.618zM6 8.764l5 2.5v7.054l-5-2.5V8.764zm7 9.554V11.264l5-2.5v7.054l-5 2.5z"/>
+                <div class="brand-container">
+                    <div class="brand-logo">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L4 6v12l8 4 8-4V6l-8-4zM12 4.618L17.236 7 12 9.382 6.764 7 12 4.618zM6 8.764l5 2.5v7.054l-5-2.5V8.764zm7 9.554V11.264l5-2.5v7.054l-5 2.5z" fill="#2b6cb0"/>
                         </svg>
                     </div>
-                    <div class="logo-text">Med<span>Sync</span></div>
+                    <span class="brand-name">Med<strong>Sync</strong></span>
                 </div>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -122,5 +122,16 @@
         });
     });
     </script>
+
+    <!-- Adicione isso no final do body, antes do fechamento -->
+    <div class="floating-btn-wrapper">
+        <a class="floating-btn" href="{{ url_for('agendar') }}">
+            <span class="text">Agendar Consulta</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4.66669 11.3334L11.3334 4.66669" stroke="white" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M4.66669 4.66669H11.3334V11.3334" stroke="white" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+    </div>
 </body>
 </html> 

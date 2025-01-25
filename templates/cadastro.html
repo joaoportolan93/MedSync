@@ -1,65 +1,56 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="form-container">
-    <div class="container">
-        <div class="auth-card card">
-            <div class="card-body">
-                <h2 class="card-title text-center">Cadastro</h2>
-                
-                {% with messages = get_flashed_messages() %}
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-danger">{{ message }}</div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
-                
-                <form method="POST" action="{{ url_for('cadastro') }}">
-                    <div class="mb-3">
-                        <label class="form-label">Nome Completo</label>
-                        <input type="text" class="form-control" name="nome" required>
-                    </div>
+<div class="container mt-5 pt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="text-center mb-4">Cadastro</h2>
                     
-                    <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-control" name="email" required>
-                    </div>
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-danger">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
                     
-                    <div class="mb-3">
-                        <label class="form-label">Telefone</label>
-                        <input type="tel" class="form-control" name="telefone">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Data de Nascimento</label>
-                        <input type="date" class="form-control" name="data_nascimento">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Senha</label>
-                        <input type="password" class="form-control" name="senha" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Confirmar Senha</label>
-                        <input type="password" class="form-control" name="confirmar_senha" required>
-                    </div>
-                    
-                    <div class="d-grid">
-                        <button type="submit" class="btn-agendar">
-                            <span class="text">Criar Conta</span>
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4.66669 11.3334L11.3334 4.66669" stroke="white" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M4.66669 4.66669H11.3334V11.3334" stroke="white" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </button>
-                    </div>
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="nome" class="form-label">Nome Completo</label>
+                            <input type="text" class="form-control" id="nome" name="nome" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="telefone" class="form-label">Telefone</label>
+                            <input type="tel" class="form-control" id="telefone" name="telefone">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="data_nascimento" class="form-label">Data de Nascimento</label>
+                            <input type="date" class="form-control" id="data_nascimento" name="data_nascimento">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="senha" class="form-label">Senha</label>
+                            <input type="password" class="form-control" id="senha" name="senha" required>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Cadastrar</button>
+                        </div>
+                    </form>
                     
                     <div class="text-center mt-3">
-                        <a href="{{ url_for('login') }}" class="text-decoration-none">Já tem uma conta? Faça login</a>
+                        <p>Já tem uma conta? <a href="{{ url_for('login') }}">Faça login</a></p>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>

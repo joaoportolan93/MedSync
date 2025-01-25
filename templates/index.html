@@ -18,48 +18,94 @@
             </div>
             <div class="col-lg-6">
                 <div class="hero-image">
-                    <img src="{{ url_for('static', filename='img/doctor-illustration.png') }}" alt="Medical Illustration" class="img-fluid animated-image">
+                    <img src="{{ url_for('static', filename='img/doctor-illustration.png') }}" 
+                         alt="Ilustração" 
+                         class="img-fluid">
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Sobre Section -->
-<section id="sobre" class="py-5 bg-light">
+<!-- Seção Sobre -->
+<section class="sobre-section">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-6">
+        <div class="row align-items-center">
+            <div class="col-lg-6 sobre-content">
                 <h2 class="section-title">Sobre o MedSync</h2>
-                <p class="lead">Simplificando o acesso à saúde de qualidade</p>
-                <div class="about-content">
+                <p class="section-subtitle">Simplificando o acesso à saúde de qualidade</p>
+                
+                <div class="sobre-text">
                     <p>O MedSync nasceu da necessidade de tornar o processo de agendamento médico mais eficiente e acessível para todos. Nossa plataforma conecta pacientes a profissionais de saúde qualificados, permitindo agendamentos 24 horas por dia, 7 dias por semana.</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <span>Agendamento rápido e seguro</span>
+                    </div>
                     
-                    <div class="features mt-4">
-                        <div class="feature-item">
-                            <i class="fas fa-check-circle text-primary"></i>
-                            <span>Agendamento rápido e seguro</span>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-md"></i>
                         </div>
-                        <div class="feature-item">
-                            <i class="fas fa-check-circle text-primary"></i>
-                            <span>Médicos especialistas qualificados</span>
+                        <span>Médicos especialistas qualificados</span>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-check-circle"></i>
                         </div>
-                        <div class="feature-item">
-                            <i class="fas fa-check-circle text-primary"></i>
-                            <span>Confirmação instantânea</span>
+                        <span>Confirmação instantânea</span>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-history"></i>
                         </div>
-                        <div class="feature-item">
-                            <i class="fas fa-check-circle text-primary"></i>
-                            <span>Histórico de consultas</span>
-                        </div>
+                        <span>Histórico de consultas</span>
                     </div>
                 </div>
             </div>
+            
             <div class="col-lg-6">
-                <div class="about-image">
-                    <img src="{{ url_for('static', filename='img/about.png') }}" alt="About Medical Scheduler" class="img-fluid">
+                <div class="sobre-image">
+                    <img src="{{ url_for('static', filename='img/about.png') }}" 
+                         alt="Sobre MedSync" 
+                         class="img-fluid">
                 </div>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- Adicione após a seção sobre -->
+<section class="stats-section">
+    <div class="stats-container">
+        <div class="stat-item">
+            <i class="fas fa-user-md stat-icon"></i>
+            <div class="stat-number">500+</div>
+            <div class="stat-label">Médicos Cadastrados</div>
+        </div>
+        
+        <div class="stat-item">
+            <i class="fas fa-calendar-check stat-icon"></i>
+            <div class="stat-number">10k+</div>
+            <div class="stat-label">Consultas Realizadas</div>
+        </div>
+        
+        <div class="stat-item">
+            <i class="fas fa-hospital stat-icon"></i>
+            <div class="stat-number">20+</div>
+            <div class="stat-label">Especialidades</div>
+        </div>
+        
+        <div class="stat-item">
+            <i class="fas fa-smile stat-icon"></i>
+            <div class="stat-number">98%</div>
+            <div class="stat-label">Pacientes Satisfeitos</div>
         </div>
     </div>
 </section>
@@ -67,14 +113,14 @@
 <!-- Especialidades Section -->
 <section id="especialidades" class="py-5">
     <div class="container">
-        <h2 class="section-title text-center mb-5">Nossas EspeciaSlidades</h2>
+        <h2 class="section-title text-center mb-5">Nossas Especialidades</h2>
         <div class="row row-cols-1 row-cols-md-3 g-4">
             <!-- Cardiologia -->
             <div class="col">
                 <div class="card h-100 specialty-card">
                     <div class="card-body text-center">
                         <div class="specialty-icon mb-3">
-                            <i class="fas fa-heart"></i>
+                            <i class="fas fa-heartbeat"></i>
                         </div>
                         <h5 class="card-title">Cardiologia</h5>
                         <p class="card-text">Cuidados especializados para seu coração.</p>
@@ -88,7 +134,7 @@
                 <div class="card h-100 specialty-card">
                     <div class="card-body text-center">
                         <div class="specialty-icon mb-3">
-                            <i class="fas fa-allergies"></i>
+                            <i class="fas fa-user-md"></i>
                         </div>
                         <h5 class="card-title">Dermatologia</h5>
                         <p class="card-text">Cuidados completos para sua pele.</p>
@@ -102,7 +148,7 @@
                 <div class="card h-100 specialty-card">
                     <div class="card-body text-center">
                         <div class="specialty-icon mb-3">
-                            <i class="fas fa-user-md"></i>
+                            <i class="fas fa-stethoscope"></i>
                         </div>
                         <h5 class="card-title">Clínico Geral</h5>
                         <p class="card-text">Atendimento médico completo.</p>
